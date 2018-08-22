@@ -1,14 +1,15 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-bindir=@bindir@
-datarootdir = ${prefix}/share
-includedir = ${prefix}/include
+prefix		=@prefix@
+exec_prefix	=@exec_prefix@
+bindir		=@bindir@
+datarootdir	= ${prefix}/share
+includedir	= ${prefix}/include
 
-LUSI_LIBS=include/lustrec_math.lusi include/simulink_math_fcn.lusi include/conv.lusi
-LUSI_MPFR_LIB=include/mpfr_lustre.lusi
-LOCAL_BINDIR=bin
-LOCAL_DOCDIR=doc/manual
-BIN_TARGETS = lustrec lustret @lustresf_target@
+top_srcdir	:= @abs_top_srcdir@
+LUSI_LIBS	=include/lustrec_math.lusi include/simulink_math_fcn.lusi include/conv.lusi
+LUSI_MPFR_LIB	=include/mpfr_lustre.lusi
+LOCAL_BINDIR	=bin
+LOCAL_DOCDIR	=doc/manual
+BIN_TARGETS	= lustrec lustret @lustresf_target@
 
 DEFAULT_TEST_TARGET=COMPIL_LUS\|MAKE\|BIN\|DIFF
 DEFAULT_EXCLUDE_TEST=LUSTRET
@@ -59,7 +60,10 @@ dist-clean: dist-src-clean
 
 %.lusic: %.lusi
 	@echo Compiling $<
-	@$(LOCAL_BINDIR)/lustrec -verbose 0 -I include -d include $<
+	$(LOCAL_BINDIR)/lustrec -verbose 0 \
+	-I $(top_srcdir)/include \
+	-d $(top_srcdir)/include \
+	$(top_srcdir)/$<
 
 clean-lusic:
 	@rm -f $(LUSI_LIBS:%.lusi=%.lusic)
@@ -69,20 +73,21 @@ compile-lusi: $(LUSI_LIBS:%.lusi=%.lusic)
 
 compile-mpfr-lusi: $(LUSI_MPFR_LIB)
 	@echo Compiling $<
-	@$(LOCAL_BINDIR)/lustrec -verbose 0 -mpfr 1 -d include $<
+	@$(LOCAL_BINDIR)/lustrec -verbose 0 -mpfr 1 -d $(top_srcdir)/include $<
 
 install-include: compile-lusi compile-mpfr-lusi
-	install -m 0655 include/* ${includedir}/lustrec
+	install -m 0644 include/* ${DESTDIR}/${includedir}/lustrec
 
 install-base: clean-lusic
-	mkdir -p ${bindir}
-	for x in $(BIN_TARGETS); do install -m 0755 $(LOCAL_BINDIR)/$$x ${bindir}; done
-	mkdir -p ${datarootdir}
-	install -m 0655 share/* ${datarootdir}
-	mkdir -p ${includedir}/lustrec
-	install -m 0655 include/* ${includedir}/lustrec
+	mkdir -p ${DESTDIR}/${bindir}
+	for x in $(BIN_TARGETS); do install -m 0755 $(LOCAL_BINDIR)/$$x ${DESTDIR}/${bindir}; done
+	mkdir -p ${DESTDIR}/${datarootdir}
+	install -m 0644 share/* ${DESTDIR}/${datarootdir}
+	mkdir -p ${DESTDIR}/${includedir}/lustrec
+	install -m 0644 include/* ${DESTDIR}/${includedir}/lustrec
 
 install: install-base install-include
+# install: install-base
 
 uninstall:
 	rm -Rf ${includedir}/lustrec

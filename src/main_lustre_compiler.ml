@@ -53,9 +53,6 @@ let compile_header dirname  basename extension =
   end
 
 
-
-
-
 (* compile a .lus source file *)
 let rec compile_source dirname basename extension =
   let source_name = dirname ^ "/" ^ basename ^ extension in
@@ -140,23 +137,25 @@ let anonymous filename =
   else
     raise (Arg.Bad ("Can only compile *.lusi, *.lus or *.ec files"))
 
-let _ =
+let main () =
   Global.initialize ();
   Corelang.add_internal_funs ();
   try
     Printexc.record_backtrace true;
-
+    
     let options = Options_management.lustrec_options @ (Plugins.options ()) in
     
     Arg.parse options anonymous usage
   with
-  | Parse.Error _
-  | Types.Error (_,_) | Clocks.Error (_,_) -> exit 1
-  | Corelang.Error (_ (* loc *), kind) (*| Task_set.Error _*) -> exit (Error.return_code kind)
-  (* | Causality.Error _  -> exit (Error.return_code Error.AlgebraicLoop) *)
-  | Sys_error msg -> (eprintf "Failure: %s@." msg); exit 1
-  | exc -> (track_exception (); raise exc) 
+    | Parse.Error _
+      | Types.Error (_,_) | Clocks.Error (_,_) -> exit 1
+    | Corelang.Error (_ (* loc *), kind) (*| Task_set.Error _*) -> exit (Error.return_code kind)
+    (* | Causality.Error _  -> exit (Error.return_code Error.AlgebraicLoop) *)
+    | Sys_error msg -> (eprintf "Failure: %s@." msg); exit 1
+    | exc -> (track_exception (); raise exc) 
+;;
 
+main () ;;
 (* Local Variables: *)
 (* compile-command:"make -C .." *)
 (* End: *)

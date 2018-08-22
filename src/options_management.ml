@@ -36,30 +36,56 @@ let add_include_dir dir =
     perform a fold_right to respect the order
 *)
 let search_lib_path (local, full_file_name) =
-  let paths = (if local then !include_dirs else Version.include_path::!include_dirs) in
-  let name =
-    List.fold_right (fun dir res ->
-      match res with Some _ -> res
-      | None ->
-	 let path_to_lib = dir ^ "/" ^ full_file_name in 
-	 if Sys.file_exists path_to_lib then
-	   Some dir
-	 else
-	   None
-    )
-      paths
-      None
+  let paths =
+    (if local then
+       !include_dirs
+     else
+       Version.include_path::!include_dirs)
   in
+  let rec in_path rempath nme =
+    match rempath with
+      | [] -> None
+      | x::xs ->
+         (if Sys.file_exists @@ x ^ "/" ^ nme then
+            Some x
+          else
+            in_path xs nme)
+  in
+  let name = in_path paths full_file_name in
+  (* let name =
+   *   List.fold_right
+   *     (fun dir res ->
+   *       match res with
+   *         | Some _ -> res
+   *         | None ->
+   *            let path_to_lib = dir ^ "/" ^ full_file_name in 
+   *            if Sys.file_exists path_to_lib then
+   *              Some dir
+   *            else
+   *              None)
+   *     paths
+   *     None
+   * in *)
   match name with
-  | None -> Format.eprintf "Unable to find library %s in paths %a@.@?" full_file_name (Utils.fprintf_list ~sep:", " Format.pp_print_string) paths;raise Not_found
-  | Some s -> s
+    | None ->
+       Format.eprintf
+         "Unable to find library %s in paths %a@.@?"
+         full_file_name
+         (Utils.fprintf_list
+            ~sep:", "
+            Format.pp_print_string) paths;
+       raise Not_found
+    | Some s -> s
+;;
+
 
 (* Search for path of core libs (without lusic: arrow and io_frontend *)
 let core_dependency lib_name =
   search_lib_path (false, lib_name ^ ".h")
     
 let name_dependency (local, dep) =
-  let dir = search_lib_path (false, dep ^ ".lusic") in
+  (* let dir = search_lib_path (false, dep ^ ".lusic") in *)
+  let dir = search_lib_path (local, dep ^ ".lusic") in
   dir ^ "/" ^ dep
   
 let set_mpfr prec =
@@ -85,7 +111,10 @@ let set_backend s =
   Backends.setup ()
 
 let common_options =
-  [ "-d", Arg.Set_string dest_dir, "uses the specified \x1b[4mdirectory\x1b[0m as root for generated/imported object and C files <default: .>";
+  [
+    "-d",
+    Arg.Set_string dest_dir,
+    "uses the specified \x1b[4mdirectory\x1b[0m as root for generated/imported object and C files <default: .>";
     "-I", Arg.String add_include_dir, "sets include \x1b[4mdirectory\x1b[0m";
     "-node", Arg.Set_string main_node, "specifies the \x1b[4mmain\x1b[0m node";
     "-print-types", Arg.Set print_types, "prints node types";
