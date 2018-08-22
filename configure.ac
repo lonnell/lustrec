@@ -86,8 +86,8 @@ AC_CHECK_LIB(gmp, __gmpz_init,
 
 AC_CHECK_LIB(mpfr, mpfr_add, [mpfr=yes],
 		   [AC_MSG_RESULT(
-[MPFR not found])
-mpfr=no])
+		   [MPFR not found])
+		   mpfr=no])
 
 # lustresf
 AC_ARG_ENABLE(lustresf, [AS_HELP_STRING([--disable-lustresf],

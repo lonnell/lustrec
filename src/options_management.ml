@@ -15,7 +15,7 @@ let print_version () =
   Format.printf "Standard lib: %s@." Version.include_path;
   Format.printf "User provided include directory: @[<h>%a@]@."
     (Utils.fprintf_list ~sep:"@ " Format.pp_print_string) !include_dirs
-
+;;
 
 let add_include_dir dir =
   let removed_slash_suffix =
@@ -26,7 +26,7 @@ let add_include_dir dir =
       dir
   in
   include_dirs := removed_slash_suffix :: !include_dirs
-
+;;
     
 (** Solving the path of required library:
     If local: look in the folders described in !Options.include_dirs
@@ -52,20 +52,6 @@ let search_lib_path (local, full_file_name) =
             in_path xs nme)
   in
   let name = in_path paths full_file_name in
-  (* let name =
-   *   List.fold_right
-   *     (fun dir res ->
-   *       match res with
-   *         | Some _ -> res
-   *         | None ->
-   *            let path_to_lib = dir ^ "/" ^ full_file_name in 
-   *            if Sys.file_exists path_to_lib then
-   *              Some dir
-   *            else
-   *              None)
-   *     paths
-   *     None
-   * in *)
   match name with
     | None ->
        Format.eprintf
@@ -77,7 +63,6 @@ let search_lib_path (local, full_file_name) =
        raise Not_found
     | Some s -> s
 ;;
-
 
 (* Search for path of core libs (without lusic: arrow and io_frontend *)
 let core_dependency lib_name =
@@ -128,7 +113,9 @@ let common_options =
 let lustrec_options =
   common_options @
     [ 
-      "-init", Arg.Set delay_calculus, "performs an initialisation analysis for Lustre nodes <default: no analysis>";
+      "-init", Arg.Set delay_calculus,
+      "performs an initialisation analysis for Lustre nodes <default: no analysis>" ;
+
       "-dynamic", Arg.Clear static_mem, "specifies a dynamic allocation scheme for main Lustre node <default: static>";
       "-check-access", Arg.Set check, "checks at runtime that array accesses always lie within bounds <default: no check>";
       "-mpfr", Arg.Int set_mpfr, "replaces FP numbers by the MPFR library multiple precision numbers with a precision of \x1b[4mprec\x1b[0m bits <default: keep FP numbers>";
@@ -156,8 +143,10 @@ let lustrec_options =
       "-int_div_euclidean", Arg.Set integer_div_euclidean, "interprets integer division as Euclidean (default : C division semantics)";
       "-int_div_C", Arg.Clear integer_div_euclidean, "interprets integer division as C division (default)";
 
-    "-mauve", Arg.String (fun node -> mauve := node; cpp := true; static_mem := false), "generates the mauve code";
-]
+      "-mauve", Arg.String (fun node -> mauve := node; cpp := true; static_mem := false), "generates the mauve code";
+    ]
+;;
+
 
 let lustret_options =
   common_options @
@@ -165,11 +154,13 @@ let lustret_options =
     "-mcdc-cond", Arg.Set gen_mcdc, "generates MC/DC coverage";
     "-no-mutation-suffix", Arg.Set no_mutation_suffix, "does not rename node with the _mutant suffix"
   ]
+;;
+
 
 let plugin_opt (name, activate, options) =
   ( "-" ^ name , Arg.Unit activate, "activate plugin " ^ name ) ::
     (List.map (fun (opt, act, desc) -> "-" ^ name ^ opt, act, desc) options)
- 
+;;
 
 let get_witness_dir filename =
   (* Make sure the directory exists *)
@@ -182,3 +173,5 @@ let get_witness_dir filename =
     with Sys_error _ -> Unix.mkdir dir 0o750
   in
   dir
+;;
+
