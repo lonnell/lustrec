@@ -1,0 +1,9 @@
+# file      : lustrec.pc.in
+
+prefix=@prefix@
+includedir=@prefix@/include/lustrec
+
+Name: lustrec
+Description: Header file locations for C LustreC 
+Version: @PACKAGE_VERSION@
+Cflags: -I${includedir}

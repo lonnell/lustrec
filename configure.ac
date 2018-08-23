@@ -156,6 +156,8 @@ AC_CONFIG_FILES([Makefile
 		 src/pluginList.ml
 		 src/_tags
 		 src/ocaml_utils.ml
+		 share/FindLustre.cmake
+		 lib/lustrec.pc
 		 ])
 
 AC_OUTPUT
