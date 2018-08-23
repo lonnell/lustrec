@@ -40,7 +40,9 @@ let search_lib_path (local, full_file_name) =
     (if local then
        !include_dirs
      else
-       Version.include_path::!include_dirs)
+       !include_dirs @ [ Version.include_path ]
+       (* Version.include_path::!include_dirs *)
+    )
   in
   let rec in_path rempath nme =
     match rempath with
